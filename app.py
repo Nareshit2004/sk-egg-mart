@@ -518,12 +518,18 @@ scheduler.add_job(daily_reset_job, "cron", hour=0, minute=0)
 scheduler.start()
 
 # ─────────────────────────────────────────────
+# Initialize DB at module level
+# (runs for BOTH gunicorn and direct python app.py)
+# ─────────────────────────────────────────────
+with app.app_context():
+    init_db()
+
+
+# ─────────────────────────────────────────────
 # Entry
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
-    with app.app_context():
-        init_db()
     print("SK EGG MART Server Starting...")
     print("Customer Portal: http://localhost:5000")
     print("Admin Portal:    http://localhost:5000/admin")
@@ -531,3 +537,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_ENV") != "production"
     app.run(debug=debug, host="0.0.0.0", port=port)
+

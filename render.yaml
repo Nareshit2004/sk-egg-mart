@@ -9,7 +9,3 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
-    disk:
-      name: sk-egg-mart-db
-      mountPath: /opt/render/project/src/database
-      sizeGB: 1
