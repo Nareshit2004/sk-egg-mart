@@ -120,9 +120,17 @@
 
   // Set WhatsApp share link
   const waMsg = encodeURIComponent(
-    "Hello! You can now place your egg order directly online using SK EGG MART.\n\n" +
-    "Click the link below to order:\n" + portalUrl + "\n\n" +
-    "- SK EGG MART Team"
+    "Hello SK EGG MART 🥚\n\n" +
+    "I would like to place an egg order. Please find my details below:\n\n" +
+    "👤 Customer Name     : \n" +
+    "🏢 Block Name        : \n" +
+    "🚪 Room Number       : \n" +
+    "📞 Mobile Number     : \n\n" +
+    "🥚 Egg Type Required  : (White / Brown / Both)\n" +
+    "📦 Number of Trays    : \n" +
+    "🔢 Number of Eggs     : \n\n" +
+    "Please confirm my order. Thank you! 🙏\n\n" +
+    "Order via: " + portalUrl
   );
   document.getElementById("wa-share-btn").href = "https://wa.me/?text=" + waMsg;
 
