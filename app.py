@@ -23,7 +23,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database", "sk_egg_mart.db")
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "skeggmart-secret-2024-xK9p"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "skeggmart-secret-2024-xK9p")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -528,4 +528,6 @@ if __name__ == "__main__":
     print("Customer Portal: http://localhost:5000")
     print("Admin Portal:    http://localhost:5000/admin")
     print("Admin Login:     admin / skegg@2024")
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_ENV") != "production"
+    app.run(debug=debug, host="0.0.0.0", port=port)

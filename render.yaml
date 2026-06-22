@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sk-egg-mart
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+    disk:
+      name: sk-egg-mart-db
+      mountPath: /opt/render/project/src/database
+      sizeGB: 1
