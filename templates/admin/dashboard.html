@@ -1,0 +1,179 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard — SK EGG MART Admin{% endblock %}
+{% block page_title %}📊 Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stats Grid -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:24px;">
+
+  <!-- Today's Orders -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:white;">
+    <div class="stat-icon">📦</div>
+    <div class="stat-value" id="stat-today-orders">0</div>
+    <div class="stat-label">Today's Orders</div>
+  </div>
+
+  <!-- White Eggs -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#6B7280,#4B5563);color:white;">
+    <div class="stat-icon">🥚</div>
+    <div class="stat-value" id="stat-white-eggs">0</div>
+    <div class="stat-label">White Eggs Sold</div>
+  </div>
+
+  <!-- Brown Eggs -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#92400E,#78350F);color:white;">
+    <div class="stat-icon">🟤</div>
+    <div class="stat-value" id="stat-brown-eggs">0</div>
+    <div class="stat-label">Brown Eggs Sold</div>
+  </div>
+
+  <!-- Trays -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#EA580C,#C2410C);color:white;">
+    <div class="stat-icon">🗂️</div>
+    <div class="stat-value" id="stat-today-trays">0</div>
+    <div class="stat-label">Trays Sold Today</div>
+  </div>
+
+  <!-- Total Eggs Today -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;">
+    <div class="stat-icon">🔢</div>
+    <div class="stat-value" id="stat-today-eggs">0</div>
+    <div class="stat-label">Total Eggs Today</div>
+  </div>
+
+  <!-- Pending -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#F59E0B,#FBBF24);color:white;">
+    <div class="stat-icon">⏳</div>
+    <div class="stat-value" id="stat-pending">0</div>
+    <div class="stat-label">Pending Orders</div>
+  </div>
+
+  <!-- Delivered -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#10B981,#059669);color:white;">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value" id="stat-delivered">0</div>
+    <div class="stat-label">Delivered Today</div>
+  </div>
+
+  <!-- Overall -->
+  <div class="stat-card" style="background:linear-gradient(135deg,#1F2937,#374151);color:white;">
+    <div class="stat-icon">🌟</div>
+    <div class="stat-value" id="stat-total-eggs">0</div>
+    <div class="stat-label">Total Eggs (All Time)</div>
+  </div>
+
+</div>
+
+<!-- Quick Actions Row -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px;">
+  <a href="/admin/orders"
+    style="background:white;border:1.5px solid #E5E7EB;border-radius:14px;padding:16px;text-decoration:none;display:flex;align-items:center;gap:14px;transition:all 0.2s;"
+    onmouseover="this.style.borderColor='#F59E0B';this.style.boxShadow='0 4px 20px rgba(245,158,11,0.15)'"
+    onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow=''">
+    <span style="font-size:1.8rem;">📋</span>
+    <div>
+      <div style="font-weight:700;color:#1F2937;font-size:0.95rem;">View Orders</div>
+      <div style="font-size:0.78rem;color:#6B7280;">Manage live orders</div>
+    </div>
+  </a>
+  <button onclick="exportExcel()"
+    style="background:white;border:1.5px solid #E5E7EB;border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;text-align:left;"
+    onmouseover="this.style.borderColor='#10B981';this.style.boxShadow='0 4px 20px rgba(16,185,129,0.15)'"
+    onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow=''">
+    <span style="font-size:1.8rem;">📊</span>
+    <div>
+      <div style="font-weight:700;color:#1F2937;font-size:0.95rem;">Export Excel</div>
+      <div style="font-size:0.78rem;color:#6B7280;">Download all orders</div>
+    </div>
+  </button>
+  <a href="/admin/history"
+    style="background:white;border:1.5px solid #E5E7EB;border-radius:14px;padding:16px;text-decoration:none;display:flex;align-items:center;gap:14px;transition:all 0.2s;"
+    onmouseover="this.style.borderColor='#8B5CF6';this.style.boxShadow='0 4px 20px rgba(139,92,246,0.15)'"
+    onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow=''">
+    <span style="font-size:1.8rem;">📅</span>
+    <div>
+      <div style="font-weight:700;color:#1F2937;font-size:0.95rem;">Order History</div>
+      <div style="font-size:0.78rem;color:#6B7280;">Last 10 days data</div>
+    </div>
+  </a>
+</div>
+
+<!-- Recent Orders Preview -->
+<div style="background:white;border-radius:16px;padding:20px;border:1px solid #F3F4F6;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h3 style="font-weight:700;color:#1F2937;font-size:1rem;">🕐 Recent Orders</h3>
+    <a href="/admin/orders" style="color:var(--primary);font-size:0.85rem;font-weight:600;text-decoration:none;">View All →</a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Block</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders-tbody">
+        <tr>
+          <td colspan="5" style="text-align:center;padding:30px;color:#9CA3AF;">
+            <div style="font-size:1.5rem;margin-bottom:6px;">📦</div>
+            Loading orders…
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Auto-refresh notice -->
+<div style="margin-top:16px;text-align:center;">
+  <p style="font-size:0.78rem;color:#9CA3AF;">🔄 Dashboard auto-refreshes every 15 seconds</p>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Override renderOrdersTable for the 5-column dashboard preview
+const _origRender = window.renderOrdersTable;
+function renderOrdersTable(orders) {
+  const tbody = document.getElementById("orders-tbody");
+  if (!tbody) return;
+  const recent = orders.slice(0, 8);
+  if (recent.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:#9CA3AF;">No orders today yet</td></tr>`;
+    return;
+  }
+  const STATUS_COLORS = {
+    "Pending": "status-pending", "Preparing": "status-preparing",
+    "Out For Delivery": "status-out-for-delivery", "Delivered": "status-delivered", "Cancelled": "status-cancelled"
+  };
+  const STATUS_ICONS = { "Pending":"⏳","Preparing":"👨‍🍳","Out For Delivery":"🚴","Delivered":"✅","Cancelled":"❌" };
+  tbody.innerHTML = recent.map(o => `
+    <tr>
+      <td><a href="/admin/order/${o.order_id}" style="color:var(--primary);font-weight:700;text-decoration:none;font-size:0.82rem;">${o.order_id}</a></td>
+      <td style="font-weight:600;font-size:0.88rem;">${o.customer.name}</td>
+      <td><span style="background:#FEF3C7;color:#D97706;padding:2px 8px;border-radius:4px;font-weight:700;font-size:0.8rem;">Blk ${o.customer.block_name}</span></td>
+      <td style="font-size:0.82rem;color:#6B7280;">${o.time}</td>
+      <td><span class="status-badge ${STATUS_COLORS[o.status] || 'status-pending'}" style="font-size:0.72rem;">${STATUS_ICONS[o.status]||'⏳'} ${o.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+async function loadDashboardOrders() {
+  try {
+    const res = await fetch('/api/orders');
+    const orders = await res.json();
+    renderOrdersTable(orders);
+  } catch(e) {}
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadDashboardOrders();
+  setInterval(loadDashboardOrders, 15000);
+});
+</script>
+{% endblock %}

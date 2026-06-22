@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#F59E0B" />
+  <meta name="description" content="SK EGG MART — Wholesale Eggs with Home Delivery. Order fresh eggs online." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SK EGG MART" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
+  <title>{% block title %}SK EGG MART{% endblock %}</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#F59E0B', dark: '#D97706', light: '#FDE68A' },
+            secondary: { DEFAULT: '#EA580C', dark: '#C2410C' },
+          },
+          fontFamily: {
+            outfit: ['Outfit', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+
+  {% block head %}{% endblock %}
+</head>
+<body class="font-outfit">
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="flash-messages" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;">
+        {% for category, message in messages %}
+        <div class="toast {{ 'success' if category == 'success' else 'error' if category == 'error' else '' }}"
+          style="animation:toastIn 0.4s ease;">
+          <span>{{ '✅' if category == 'success' else '❌' }}</span>
+          <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <script>
+        setTimeout(() => {
+          document.getElementById('flash-messages')?.remove();
+        }, 4000);
+      </script>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  {% block body %}{% endblock %}
+
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:1.8rem;">🥚</span>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;">Install SK EGG MART</div>
+        <div style="font-size:0.78rem;opacity:0.8;">Add to home screen for quick access</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="installPWA()"
+        style="background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:600;font-size:0.85rem;cursor:pointer;">
+        Install
+      </button>
+      <button onclick="dismissPWA()"
+        style="background:rgba(255,255,255,0.2);color:white;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <!-- PWA Script -->
+  <script src="/static/js/pwa.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,101 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Order History — SK EGG MART Admin{% endblock %}
+{% block page_title %}📅 Order History{% endblock %}
+
+{% block content %}
+
+<!-- Date Range Tabs -->
+<div style="background:white;border-radius:14px;padding:16px;margin-bottom:20px;border:1px solid #F3F4F6;">
+  <h3 style="font-weight:700;color:#1F2937;margin-bottom:12px;font-size:0.95rem;">📆 Select Time Period</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button data-days="1" class="active-tab"
+      style="border:1.5px solid var(--primary);border-radius:8px;padding:8px 18px;font-family:'Outfit',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--primary);">
+      Today
+    </button>
+    <button data-days="2"
+      style="border:1.5px solid #E5E7EB;border-radius:8px;padding:8px 18px;font-family:'Outfit',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all 0.2s;background:transparent;color:#6B7280;">
+      Yesterday
+    </button>
+    <button data-days="7"
+      style="border:1.5px solid #E5E7EB;border-radius:8px;padding:8px 18px;font-family:'Outfit',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all 0.2s;background:transparent;color:#6B7280;">
+      Last 7 Days
+    </button>
+    <button data-days="10"
+      style="border:1.5px solid #E5E7EB;border-radius:8px;padding:8px 18px;font-family:'Outfit',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all 0.2s;background:transparent;color:#6B7280;">
+      Last 10 Days
+    </button>
+  </div>
+</div>
+
+<!-- Summary Aggregate Cards (populated by JS) -->
+<div id="aggregate-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;"></div>
+
+<!-- History List -->
+<div id="history-container">
+  <div style="text-align:center;padding:40px;color:#9CA3AF;">
+    <div class="spinner" style="margin:0 auto 12px;"></div>
+    Loading history…
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Override loadHistory to also populate aggregate cards
+const _baseLoadHistory = loadHistory;
+
+async function loadHistory(days) {
+  const res = await fetch(`/api/history?days=${days}`);
+  const data = await res.json();
+  renderHistory(data);
+  renderAggregateCards(data);
+}
+
+function renderAggregateCards(data) {
+  const totalOrders = data.reduce((a,d) => a + d.total_orders, 0);
+  const totalTrays = data.reduce((a,d) => a + d.total_trays, 0);
+  const totalEggs = data.reduce((a,d) => a + d.total_eggs, 0);
+  const totalDelivered = data.reduce((a,d) => a + d.delivered, 0);
+  const totalCancelled = data.reduce((a,d) => a + d.cancelled, 0);
+  const activeDays = data.filter(d => d.total_orders > 0).length;
+
+  const cards = [
+    { label: "Total Orders", value: totalOrders, icon: "📦", color: "#F59E0B" },
+    { label: "Total Trays", value: totalTrays, icon: "🗂️", color: "#EA580C" },
+    { label: "Total Eggs", value: totalEggs, icon: "🥚", color: "#7C3AED" },
+    { label: "Delivered", value: totalDelivered, icon: "✅", color: "#10B981" },
+    { label: "Cancelled", value: totalCancelled, icon: "❌", color: "#EF4444" },
+    { label: "Active Days", value: activeDays, icon: "📅", color: "#3B82F6" },
+  ];
+
+  document.getElementById("aggregate-cards").innerHTML = cards.map(c => `
+    <div style="background:white;border-radius:12px;padding:16px;border:1.5px solid #F3F4F6;text-align:center;transition:transform 0.2s;"
+      onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:1.5rem;margin-bottom:6px;">${c.icon}</div>
+      <div style="font-size:1.5rem;font-weight:900;color:${c.color};">${c.value}</div>
+      <div style="font-size:0.75rem;color:#6B7280;font-weight:500;">${c.label}</div>
+    </div>
+  `).join('');
+}
+
+// Tab styling with active-tab class
+document.querySelectorAll("[data-days]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-days]").forEach(b => {
+      b.classList.remove("active-tab");
+      b.style.color = "#6B7280";
+      b.style.borderColor = "#E5E7EB";
+      b.style.background = "transparent";
+    });
+    btn.classList.add("active-tab");
+    btn.style.color = "white";
+    btn.style.borderColor = "var(--primary)";
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadHistory(1);
+});
+</script>
+{% endblock %}

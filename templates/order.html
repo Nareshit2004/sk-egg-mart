@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Place Order — SK EGG MART{% endblock %}
+
+{% block body %}
+<div style="min-height:100vh;background:#F9FAFB;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#F59E0B,#EA580C);padding:16px 20px;position:sticky;top:0;z-index:50;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="/" style="color:white;text-decoration:none;font-size:1.4rem;">←</a>
+      <div>
+        <h1 style="color:white;font-weight:800;font-size:1.15rem;line-height:1.2;">Place Order</h1>
+        <p style="color:rgba(255,255,255,0.85);font-size:0.78rem;">SK EGG MART</p>
+      </div>
+      <div style="margin-left:auto;background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;">
+        <span style="color:white;font-size:0.78rem;font-weight:600;">🥚 Fresh Daily</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step Indicator -->
+  <div class="step-indicator">
+    <div class="step">
+      <div class="step-dot active" id="step1-dot">1</div>
+      <span style="font-size:0.8rem;font-weight:600;color:var(--primary);">Your Info</span>
+    </div>
+    <div class="step-line active" id="line1"></div>
+    <div class="step">
+      <div class="step-dot inactive" id="step2-dot">2</div>
+      <span style="font-size:0.8rem;font-weight:500;color:#9CA3AF;" id="step2-label">Order Items</span>
+    </div>
+    <div class="step-line inactive" id="line2"></div>
+    <div class="step">
+      <div class="step-dot inactive" id="step3-dot">3</div>
+      <span style="font-size:0.8rem;font-weight:500;color:#9CA3AF;" id="step3-label">Review</span>
+    </div>
+  </div>
+
+  <div style="max-width:640px;margin:0 auto;padding:20px 16px 100px;">
+
+    <!-- ─── SECTION 1: Customer Info ─── -->
+    <div id="section-customer" class="glass-card" style="margin-bottom:20px;padding:20px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="background:var(--primary);color:white;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;">1</span>
+        Your Information
+      </h2>
+
+      <div style="display:grid;gap:14px;">
+
+        <!-- Name -->
+        <div>
+          <label class="form-label" for="customer_name">Full Name <span style="color:#EF4444">*</span></label>
+          <input type="text" id="customer_name" class="form-input"
+            placeholder="Enter your full name"
+            autocomplete="name" />
+        </div>
+
+        <!-- Block + Room Row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label class="form-label" for="block_name">Block <span style="color:#EF4444">*</span></label>
+            <select id="block_name" class="form-select">
+              <option value="">Select Block</option>
+              {% for b in ['A','B','C','D','E','F','G','H','I','J','K','L'] %}
+              <option value="{{ b }}">Block {{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="room_number">Room No. <span style="color:#EF4444">*</span></label>
+            <input type="number" id="room_number" class="form-input"
+              placeholder="e.g. 101"
+              min="1" inputmode="numeric" />
+          </div>
+        </div>
+
+        <!-- Mobile -->
+        <div>
+          <label class="form-label" for="mobile_number">Mobile Number <span style="color:#EF4444">*</span></label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#6B7280;font-weight:600;">+91</span>
+            <input type="tel" id="mobile_number" class="form-input"
+              placeholder="10-digit number"
+              maxlength="10"
+              inputmode="numeric"
+              style="padding-left:48px;" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── SECTION 2: Order Items ─── -->
+    <div class="glass-card" style="margin-bottom:20px;padding:20px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:var(--primary);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="background:var(--primary);color:white;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;">2</span>
+        Order Items
+      </h2>
+
+      <!-- Dynamic Order Items Rendered by JS -->
+      <div id="order-items-container" style="display:flex;flex-direction:column;gap:16px;"></div>
+
+      <!-- Add Another Order Button -->
+      <button type="button" onclick="addOrderItem()"
+        style="margin-top:16px;width:100%;padding:12px;border:2px dashed #D97706;border-radius:12px;background:rgba(245,158,11,0.04);color:#D97706;font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s ease;"
+        onmouseover="this.style.background='rgba(245,158,11,0.1)'"
+        onmouseout="this.style.background='rgba(245,158,11,0.04)'">
+        ➕ Add Another Order
+      </button>
+    </div>
+
+    <!-- ─── SECTION 3: Order Summary ─── -->
+    <div class="summary-box" style="margin-bottom:20px;">
+      <h2 style="font-size:1.05rem;font-weight:800;color:#92400E;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <span>📋</span> Order Summary
+      </h2>
+
+      <div id="order-summary-items" style="margin-bottom:12px;min-height:40px;">
+        <span style="color:#9CA3AF;font-size:0.9rem;">Add items above to see summary…</span>
+      </div>
+
+      <div style="border-top:2px solid rgba(245,158,11,0.3);padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:1.6rem;font-weight:800;color:var(--secondary);" id="summary-total-trays">0</div>
+          <div style="font-size:0.8rem;color:#6B7280;font-weight:500;">Total Trays</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:1.6rem;font-weight:800;color:var(--primary);" id="summary-total-eggs">0</div>
+          <div style="font-size:0.8rem;color:#6B7280;font-weight:500;">Total Eggs</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;font-size:0.78rem;color:#92400E;display:flex;align-items:center;gap:4px;">
+        <span>ℹ️</span>
+        <span>1 Tray = 30 Eggs</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── Sticky Submit Button ─── -->
+  <div style="position:fixed;bottom:0;left:0;right:0;padding:16px 20px;background:white;border-top:1px solid #F3F4F6;box-shadow:0 -4px 20px rgba(0,0,0,0.08);z-index:50;">
+    <div style="max-width:640px;margin:0 auto;">
+      <button id="submit-btn" onclick="submitOrder()" class="btn-primary" style="width:100%;font-size:1.05rem;padding:16px;">
+        🚀 Place Order
+      </button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/customer.js"></script>
+{% endblock %}

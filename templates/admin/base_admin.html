@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Admin — SK EGG MART{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    body { font-family: 'Outfit', sans-serif; background: #F9FAFB; margin: 0; }
+    .active-tab {
+      background: linear-gradient(135deg, #F59E0B, #EA580C) !important;
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div id="sidebar-overlay" class="hidden" onclick="toggleSidebar()"
+  style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;"></div>
+
+<!-- Admin Sidebar -->
+<nav id="admin-sidebar" class="admin-sidebar">
+  <!-- Logo -->
+  <div style="padding:24px 20px;border-bottom:1px solid rgba(245,158,11,0.15);">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:42px;height:42px;background:linear-gradient(135deg,#F59E0B,#EA580C);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-size:1.3rem;">🥚</span>
+      </div>
+      <div>
+        <div style="color:white;font-weight:800;font-size:0.95rem;line-height:1.2;">SK EGG MART</div>
+        <div style="color:rgba(255,255,255,0.4);font-size:0.72rem;">Admin Portal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav Links -->
+  <div style="padding:16px 12px;flex:1;">
+    <a href="/admin/dashboard" class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}" style="color:rgba(255,255,255,0.7);margin-bottom:4px;">
+      <span style="font-size:1.1rem;">📊</span> Dashboard
+    </a>
+    <a href="/admin/orders" class="nav-link {{ 'active' if request.endpoint == 'admin_orders' }}" style="color:rgba(255,255,255,0.7);margin-bottom:4px;">
+      <span style="font-size:1.1rem;">📦</span> Live Orders
+    </a>
+    <a href="/admin/history" class="nav-link {{ 'active' if request.endpoint == 'admin_history' }}" style="color:rgba(255,255,255,0.7);margin-bottom:4px;">
+      <span style="font-size:1.1rem;">📅</span> Order History
+    </a>
+
+    <div style="margin:16px 0;border-top:1px solid rgba(245,158,11,0.1);"></div>
+
+    <button onclick="exportExcel()" class="nav-link" style="width:100%;border:none;cursor:pointer;background:rgba(16,185,129,0.1);color:#34D399;border-radius:10px;">
+      <span style="font-size:1.1rem;">📊</span> Export Excel
+    </button>
+
+    <a href="/admin/qr-code" class="nav-link {{ 'active' if request.endpoint == 'admin_qr_code' }}" style="color:rgba(255,255,255,0.7);margin-top:4px;">
+      <span style="font-size:1.1rem;">📱</span> Share QR Code
+    </a>
+
+    <a href="/" target="_blank" class="nav-link" style="color:rgba(255,255,255,0.5);margin-top:4px;">
+      <span style="font-size:1.1rem;">🌐</span> Customer Portal
+    </a>
+  </div>
+
+  <!-- Admin Info + Logout -->
+  <div style="padding:16px 12px;border-top:1px solid rgba(245,158,11,0.15);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#F59E0B,#EA580C);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="color:white;font-weight:700;font-size:0.85rem;">A</span>
+      </div>
+      <div>
+        <div style="color:white;font-weight:600;font-size:0.85rem;">{{ session.admin_username | default('Admin') }}</div>
+        <div style="color:rgba(255,255,255,0.4);font-size:0.72rem;">Administrator</div>
+      </div>
+    </div>
+    <a href="/admin/logout" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;color:#FCA5A5;text-decoration:none;font-size:0.85rem;font-weight:500;transition:background 0.2s;"
+      onmouseover="this.style.background='rgba(239,68,68,0.1)'"
+      onmouseout="this.style.background='transparent'">
+      🚪 Sign Out
+    </a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="admin-main">
+  <!-- Top Bar -->
+  <div style="background:white;border-bottom:1px solid #F3F4F6;padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:40;">
+    <button onclick="toggleSidebar()"
+      style="display:none;background:#F3F4F6;border:none;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:1.2rem;align-items:center;justify-content:center;"
+      id="menu-toggle">☰</button>
+    <div style="flex:1;">
+      <h2 style="font-size:1.1rem;font-weight:700;color:#1F2937;">{% block page_title %}Dashboard{% endblock %}</h2>
+      <p style="font-size:0.75rem;color:#9CA3AF;" id="live-time"></p>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="new-order-badge" style="display:none;background:linear-gradient(135deg,#F59E0B,#EA580C);color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;animation:pulse-glow 2s infinite;">
+        🔔 NEW
+      </div>
+      <a href="/admin/orders"
+        style="background:#F3F4F6;border-radius:8px;padding:6px 14px;font-size:0.82rem;font-weight:600;color:#374151;text-decoration:none;">
+        📦 Orders
+      </a>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div style="padding:24px;">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script>
+// Show menu toggle on mobile
+if (window.innerWidth <= 768) {
+  document.getElementById("menu-toggle").style.display = "flex";
+}
+window.addEventListener("resize", () => {
+  document.getElementById("menu-toggle").style.display = window.innerWidth <= 768 ? "flex" : "none";
+});
+
+// Live clock
+function updateClock() {
+  const el = document.getElementById("live-time");
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" })
+      + " • " + now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+<script src="/static/js/admin.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

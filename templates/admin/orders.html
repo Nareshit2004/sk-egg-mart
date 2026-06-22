@@ -1,0 +1,80 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Live Orders — SK EGG MART Admin{% endblock %}
+{% block page_title %}📦 Live Orders{% endblock %}
+
+{% block content %}
+
+<!-- Filters & Search Bar -->
+<div style="background:white;border-radius:14px;padding:16px;margin-bottom:20px;border:1px solid #F3F4F6;">
+  <div style="display:grid;grid-template-columns:1fr;gap:12px;">
+
+    <!-- Search -->
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" class="form-input" placeholder="Search by name, mobile, or order ID…" />
+    </div>
+
+    <!-- Filter Row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
+      <select id="status-filter" class="form-select" style="font-size:0.85rem;">
+        <option value="">All Status</option>
+        <option value="Pending">⏳ Pending</option>
+        <option value="Preparing">👨‍🍳 Preparing</option>
+        <option value="Out For Delivery">🚴 Out For Delivery</option>
+        <option value="Delivered">✅ Delivered</option>
+        <option value="Cancelled">❌ Cancelled</option>
+      </select>
+
+      <select id="block-filter" class="form-select" style="font-size:0.85rem;">
+        <option value="">All Blocks</option>
+        {% for b in ['A','B','C','D','E','F','G','H','I','J','K','L'] %}
+        <option value="{{ b }}">Block {{ b }}</option>
+        {% endfor %}
+      </select>
+
+      <input type="date" id="date-filter" class="form-input" style="font-size:0.85rem;" />
+
+      <button onclick="exportExcel()" class="btn-primary" style="padding:10px 16px;font-size:0.85rem;border-radius:8px;">
+        📊 Export Excel
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+    <div style="width:8px;height:8px;background:#10B981;border-radius:50%;animation:pulse-glow 1.5s infinite;"></div>
+    <span style="font-size:0.78rem;color:#6B7280;">Auto-refreshing every 15 seconds</span>
+    <button onclick="loadOrders()" style="margin-left:auto;background:none;border:none;color:var(--primary);font-size:0.82rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">
+      🔄 Refresh Now
+    </button>
+  </div>
+</div>
+
+<!-- Orders Table -->
+<div style="background:white;border-radius:14px;border:1px solid #F3F4F6;overflow:hidden;">
+  <div style="overflow-x:auto;">
+    <table class="data-table" style="min-width:900px;">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Block</th>
+          <th>Room</th>
+          <th>Mobile</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="orders-tbody">
+        <tr>
+          <td colspan="8" style="text-align:center;padding:40px;color:#9CA3AF;">
+            <div class="spinner" style="margin:0 auto 10px;"></div>
+            Loading orders…
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

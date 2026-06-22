@@ -1,0 +1,193 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Share QR Code — SK EGG MART Admin{% endblock %}
+{% block page_title %}📱 Share QR Code{% endblock %}
+
+{% block content %}
+
+<!-- Load QR Code JS library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<div style="max-width:520px;margin:0 auto;">
+
+  <!-- Header Card -->
+  <div style="background:linear-gradient(135deg,#FFF8E7,#FDE68A);border-radius:20px;padding:24px;margin-bottom:20px;text-align:center;border:1.5px solid rgba(245,158,11,0.25);">
+    <div style="font-size:2.5rem;margin-bottom:8px;">📱</div>
+    <h2 style="font-size:1.2rem;font-weight:800;color:#92400E;margin:0 0 6px;">Customer Ordering QR Code</h2>
+    <p style="font-size:0.85rem;color:#A16207;margin:0;">
+      Share this QR code with customers — they scan it and directly land on the order page!
+    </p>
+  </div>
+
+  <!-- QR Code Card -->
+  <div style="background:white;border-radius:20px;padding:32px 24px;margin-bottom:20px;border:1.5px solid #F3F4F6;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+
+    <!-- Shop Name Above QR -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1rem;font-weight:700;color:#D97706;letter-spacing:0.05em;">🥚 SK EGG MART</div>
+      <div style="font-size:0.78rem;color:#9CA3AF;margin-top:2px;">Scan to place your order</div>
+    </div>
+
+    <!-- QR Code Container -->
+    <div style="display:inline-block;padding:16px;background:white;border-radius:16px;border:3px solid #F59E0B;box-shadow:0 8px 32px rgba(245,158,11,0.2);margin-bottom:20px;">
+      <div id="qrcode"></div>
+    </div>
+
+    <!-- URL shown below QR -->
+    <div style="background:#F9FAFB;border-radius:10px;padding:10px 16px;margin-bottom:24px;">
+      <div style="font-size:0.72rem;color:#9CA3AF;margin-bottom:2px;">Customer Portal URL</div>
+      <div id="portal-url" style="font-size:0.88rem;font-weight:600;color:#3B82F6;word-break:break-all;"></div>
+    </div>
+
+    <!-- Download Button -->
+    <button onclick="downloadQR()"
+      style="background:linear-gradient(135deg,#F59E0B,#EA580C);
+             color:white;
+             border:none;
+             border-radius:50px;
+             padding:14px 32px;
+             font-family:'Outfit',sans-serif;
+             font-size:1rem;
+             font-weight:700;
+             cursor:pointer;
+             box-shadow:0 6px 20px rgba(245,158,11,0.4);
+             width:100%;
+             margin-bottom:12px;"
+      onmouseover="this.style.filter='brightness(1.08)'"
+      onmouseout="this.style.filter=''">
+      ⬇️ &nbsp;Download QR Image (PNG)
+    </button>
+
+    <!-- WhatsApp Share Button -->
+    <a id="wa-share-btn"
+       href="#"
+       target="_blank"
+       style="display:block;
+              background:linear-gradient(135deg,#25D366,#128C7E);
+              color:white;
+              border:none;
+              border-radius:50px;
+              padding:14px 32px;
+              font-family:'Outfit',sans-serif;
+              font-size:1rem;
+              font-weight:700;
+              text-decoration:none;
+              text-align:center;
+              box-shadow:0 6px 20px rgba(37,211,102,0.35);"
+       onmouseover="this.style.filter='brightness(1.08)'"
+       onmouseout="this.style.filter=''">
+      <svg style="vertical-align:middle;margin-right:6px;" width="18" height="18" viewBox="0 0 24 24" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      Share Link on WhatsApp
+    </a>
+  </div>
+
+  <!-- Instructions Card -->
+  <div style="background:white;border-radius:16px;padding:20px;border:1.5px solid #F3F4F6;">
+    <h3 style="font-weight:700;color:#1F2937;font-size:0.95rem;margin:0 0 14px;">📋 How to Share</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#F59E0B,#EA580C);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white;font-weight:700;font-size:0.8rem;">1</div>
+        <div style="font-size:0.85rem;color:#374151;padding-top:4px;">Click <strong>"Download QR Image"</strong> to save the QR code as a PNG file</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#F59E0B,#EA580C);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white;font-weight:700;font-size:0.8rem;">2</div>
+        <div style="font-size:0.85rem;color:#374151;padding-top:4px;">Send the PNG image to customers via <strong>WhatsApp, SMS or Email</strong></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#F59E0B,#EA580C);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white;font-weight:700;font-size:0.8rem;">3</div>
+        <div style="font-size:0.85rem;color:#374151;padding-top:4px;">Customer scans the QR with their phone camera and directly opens the ordering page</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white;font-weight:700;font-size:0.8rem;">4</div>
+        <div style="font-size:0.85rem;color:#374151;padding-top:4px;">Or click <strong>"Share Link on WhatsApp"</strong> to send the order URL directly in chat</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  // Auto-detect the customer portal URL from the current browser
+  const portalUrl = window.location.origin + "/order";
+
+  // Show URL text
+  document.getElementById("portal-url").textContent = portalUrl;
+
+  // Set WhatsApp share link
+  const waMsg = encodeURIComponent(
+    "Hello! You can now place your egg order directly online using SK EGG MART.\n\n" +
+    "Click the link below to order:\n" + portalUrl + "\n\n" +
+    "- SK EGG MART Team"
+  );
+  document.getElementById("wa-share-btn").href = "https://wa.me/?text=" + waMsg;
+
+  // Generate QR Code (256x256)
+  new QRCode(document.getElementById("qrcode"), {
+    text: portalUrl,
+    width: 220,
+    height: 220,
+    colorDark: "#1A0A00",
+    colorLight: "#FFFFFF",
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+})();
+
+function downloadQR() {
+  // Wait a tick for QR canvas/img to render
+  setTimeout(function () {
+    var qrDiv = document.getElementById("qrcode");
+    var canvas = qrDiv.querySelector("canvas");
+    var img    = qrDiv.querySelector("img");
+
+    if (canvas) {
+      // Canvas approach — draw branded frame around QR
+      var size = 300;
+      var out  = document.createElement("canvas");
+      out.width  = size;
+      out.height = size + 60;
+      var ctx = out.getContext("2d");
+
+      // White background
+      ctx.fillStyle = "#FFFFFF";
+      ctx.roundRect(0, 0, out.width, out.height, 16);
+      ctx.fill();
+
+      // Orange border
+      ctx.strokeStyle = "#F59E0B";
+      ctx.lineWidth = 6;
+      ctx.roundRect(3, 3, out.width - 6, out.height - 6, 14);
+      ctx.stroke();
+
+      // Draw QR
+      var pad = (size - canvas.width) / 2;
+      ctx.drawImage(canvas, pad, pad, canvas.width, canvas.height);
+
+      // Shop name at bottom
+      ctx.fillStyle = "#D97706";
+      ctx.font      = "bold 17px 'Outfit', Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("SK EGG MART — Scan to Order", out.width / 2, size + 36);
+
+      var link      = document.createElement("a");
+      link.download = "SKEGGMART_QR_Code.png";
+      link.href     = out.toDataURL("image/png");
+      link.click();
+
+    } else if (img) {
+      // Fallback: download existing image
+      var link      = document.createElement("a");
+      link.download = "SKEGGMART_QR_Code.png";
+      link.href     = img.src;
+      link.click();
+    } else {
+      showToast("QR code is still generating, please wait a second.", "error");
+    }
+  }, 300);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Order {{ order.order_id }} — SK EGG MART Admin{% endblock %}
+{% block page_title %}📋 Order Details{% endblock %}
+
+{% block content %}
+
+<div style="max-width:700px;">
+
+  <!-- Back -->
+  <a href="/admin/orders" style="display:inline-flex;align-items:center;gap:6px;color:#6B7280;text-decoration:none;font-size:0.88rem;font-weight:500;margin-bottom:20px;">
+    ← Back to Orders
+  </a>
+
+  <!-- Order ID + Status -->
+  <div style="background:white;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+    <div>
+      <p style="font-size:0.78rem;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Order ID</p>
+      <h2 style="font-size:1.3rem;font-weight:900;color:var(--primary);">{{ order.order_id }}</h2>
+      <p style="font-size:0.82rem;color:#6B7280;margin-top:4px;">{{ order.date }} at {{ order.time }}</p>
+    </div>
+    <div>
+      {% set status_cls = {
+        'Pending':'status-pending','Preparing':'status-preparing',
+        'Out For Delivery':'status-out-for-delivery',
+        'Delivered':'status-delivered','Cancelled':'status-cancelled'
+      } %}
+      {% set status_icons = {'Pending':'⏳','Preparing':'👨‍🍳','Out For Delivery':'🚴','Delivered':'✅','Cancelled':'❌'} %}
+      <span class="status-badge {{ status_cls.get(order.status, 'status-pending') }}" style="font-size:0.9rem;padding:6px 14px;" id="status-display">
+        {{ status_icons.get(order.status,'⏳') }} {{ order.status }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Update Status -->
+  <div style="background:white;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid #F3F4F6;">
+    <h3 style="font-weight:700;color:#1F2937;margin-bottom:14px;font-size:0.95rem;">🔄 Update Order Status</h3>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;">
+      <select id="new-status" class="form-select">
+        {% for s in ['Pending','Preparing','Out For Delivery','Delivered','Cancelled'] %}
+        <option value="{{ s }}" {{ 'selected' if s == order.status }}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      <button onclick="saveStatus()" class="btn-primary" style="border-radius:10px;padding:12px 20px;white-space:nowrap;">
+        Save Status
+      </button>
+    </div>
+
+    <!-- Status Timeline -->
+    <div style="margin-top:16px;display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:4px;">
+      {% set steps = ['Pending','Preparing','Out For Delivery','Delivered'] %}
+      {% set step_icons = ['⏳','👨‍🍳','🚴','✅'] %}
+      {% for i in range(steps|length) %}
+        <div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
+          <div style="text-align:center;min-width:60px;">
+            <div style="width:30px;height:30px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;
+              {{ 'background:linear-gradient(135deg,#F59E0B,#EA580C);color:white;' if steps[i] == order.status else
+                 'background:#D1FAE5;color:#059669;' if (steps.index(order.status) if order.status in steps else 0) > i else
+                 'background:#F3F4F6;color:#9CA3AF;' }}">
+              {{ step_icons[i] }}
+            </div>
+            <div style="font-size:0.65rem;color:#6B7280;font-weight:600;">{{ steps[i] }}</div>
+          </div>
+          {% if i < steps|length - 1 %}
+          <div style="height:2px;width:20px;flex-shrink:0;margin-bottom:16px;
+            background: {{ '#10B981' if (steps.index(order.status) if order.status in steps else 0) > i else '#E5E7EB' }};"></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Customer Details -->
+  <div style="background:white;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid #F3F4F6;">
+    <h3 style="font-weight:700;color:#1F2937;margin-bottom:14px;font-size:0.95rem;">👤 Customer Information</h3>
+    <div style="display:grid;gap:0;">
+      {% set cust_fields = [
+        ('Name', order.customer.name, ''),
+        ('Block', 'Block ' + order.customer.block_name, 'background:#FEF3C7;color:#D97706;padding:2px 10px;border-radius:20px;font-weight:700;'),
+        ('Room Number', order.customer.room_number, ''),
+        ('Mobile', order.customer.mobile_number, 'color:#3B82F6;'),
+      ] %}
+      {% for label, value, extra_style in cust_fields %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F3F4F6;">
+        <span style="font-size:0.85rem;color:#6B7280;">{{ label }}</span>
+        <span style="font-weight:600;color:#1F2937;{{ extra_style }}">{{ value }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <a href="tel:{{ order.customer.mobile_number }}" class="btn-call" style="padding:8px 16px;font-size:0.85rem;border-radius:8px;">
+        📞 Call Customer
+      </a>
+      <a href="{{ whatsapp_url }}" target="_blank" class="btn-whatsapp" style="padding:8px 16px;font-size:0.85rem;border-radius:8px;" id="wa-contact">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- Order Items -->
+  <div style="background:white;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid #F3F4F6;">
+    <h3 style="font-weight:700;color:#1F2937;margin-bottom:14px;font-size:0.95rem;">🥚 Order Items</h3>
+
+    {% for item in order.order_items %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#F9FAFB;border-radius:10px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.5rem;">{{ '🥚' if 'White' in item.egg_type else '🟤' }}</span>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;color:#1F2937;">{{ item.egg_type }}</div>
+          <div style="font-size:0.78rem;color:#6B7280;">{{ item.trays }} Tray{{ 's' if item.trays > 1 }} × 30 + {{ item.additional_eggs }} extra</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:800;color:var(--primary);font-size:1.1rem;">{{ item.total_eggs }}</div>
+        <div style="font-size:0.72rem;color:#9CA3AF;">eggs</div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Totals -->
+    <div style="background:linear-gradient(135deg,#FFF8E7,#FDE68A);border-radius:10px;padding:14px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--secondary);">{{ order.total_trays }}</div>
+        <div style="font-size:0.8rem;color:#92400E;font-weight:500;">Total Trays</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--primary);">{{ order.total_eggs }}</div>
+        <div style="font-size:0.8rem;color:#92400E;font-weight:500;">Total Eggs</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const ORDER_ID = "{{ order.order_id }}";
+
+async function saveStatus() {
+  const status = document.getElementById("new-status").value;
+  try {
+    const res = await fetch(`/api/orders/${ORDER_ID}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Status updated to: ${status}`, "success");
+      setTimeout(() => location.reload(), 1000);
+    }
+  } catch(e) {
+    showToast("Failed to update status", "error");
+  }
+}
+
+// Build WhatsApp URL for admin contact
+(function() {
+  const ORDER = {{ order | tojson }};
+  const items = ORDER.items.map(i =>
+    `${i.egg_type} - ${i.trays} Tray${i.trays>1?'s':''} - ${i.additional_eggs} Eggs`
+  ).join('\n');
+  const msg = `Hello ${ORDER.customer.name},\n\nYour order from SK EGG MART has been confirmed!\n\nOrder ID: ${ORDER.order_id}\nStatus: ${ORDER.status}\n\nOrder Details:\n${items}\n\nTotal Eggs: ${ORDER.total_eggs}\n\nThank you for ordering! 🥚`;
+  const wa = document.getElementById("wa-contact");
+  if(wa) wa.href = `https://wa.me/91${ORDER.customer.mobile_number}?text=${encodeURIComponent(msg)}`;
+})();
+</script>
+{% endblock %}
