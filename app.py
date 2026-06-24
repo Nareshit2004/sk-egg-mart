@@ -20,7 +20,12 @@ import io
 # App Setup
 # ─────────────────────────────────────────────
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database", "sk_egg_mart.db")
+# On Render free tier the app dir is read-only after build; use /tmp for writable DB
+_default_db_dir = os.path.join(BASE_DIR, "database")
+DB_DIR  = os.environ.get("DB_DIR", _default_db_dir)
+DB_PATH = os.path.join(DB_DIR, "sk_egg_mart.db")
+os.makedirs(DB_DIR, exist_ok=True)
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "skeggmart-secret-2024-xK9p")
