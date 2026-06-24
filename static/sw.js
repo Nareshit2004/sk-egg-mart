@@ -1,4 +1,4 @@
-const CACHE_NAME = "sk-egg-mart-v3";
+const CACHE_NAME = "sk-egg-mart-v5";
 
 // Only cache static assets — NEVER cache HTML pages
 const STATIC_ASSETS = [

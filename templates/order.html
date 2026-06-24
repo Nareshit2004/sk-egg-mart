@@ -174,5 +174,31 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/customer.js"></script>
+<!-- Load customer.js with a cache-busting timestamp so SW cannot serve stale version -->
+<script src="/static/js/customer.js?v={{ range(10000,99999) | random }}"></script>
+<script>
+// ── INLINE SAFETY NET ──
+// Runs after customer.js. Re-fetches pricing and forces a summary update.
+// This guarantees prices show even if the SW served a cached customer.js.
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res  = await fetch("/api/pricing?" + Date.now());
+    const data = await res.json();
+    if (typeof PRICES !== "undefined") {
+      PRICES.white_egg_price = data.white_egg_price;
+      PRICES.brown_egg_price = data.brown_egg_price;
+      PRICES.delivery_charge = data.delivery_charge;
+    }
+    // Refresh price labels on already-rendered cards
+    document.querySelectorAll("[data-price-white]").forEach(el => {
+      el.textContent = `₹${data.white_egg_price} per Egg`;
+    });
+    document.querySelectorAll("[data-price-brown]").forEach(el => {
+      el.textContent = `₹${data.brown_egg_price} per Egg`;
+    });
+    // Force recalculate
+    if (typeof updateSummary === "function") updateSummary();
+  } catch(e) {}
+});
+</script>
 {% endblock %}
