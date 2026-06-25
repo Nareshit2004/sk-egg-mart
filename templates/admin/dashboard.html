@@ -140,10 +140,10 @@
     <table class="data-table">
       <thead><tr>
         <th>Order ID</th><th>Customer</th><th>Block</th>
-        <th>Eggs</th><th>Amount</th><th>Time</th><th>Status</th>
+        <th>Egg Order</th><th style="text-align:center;">Total Eggs</th><th style="text-align:right;">Amount</th><th>Time</th><th>Status</th>
       </tr></thead>
       <tbody id="orders-tbody">
-        <tr><td colspan="7" style="text-align:center;padding:30px;color:#9CA3AF;">
+        <tr><td colspan="8" style="text-align:center;padding:30px;color:#9CA3AF;">
           <div style="font-size:1.5rem;margin-bottom:6px;">📦</div>Loading orders…
         </td></tr>
       </tbody>
@@ -203,22 +203,33 @@ function renderOrdersTable(orders) {
   if (!tbody) return;
   const recent = orders.slice(0, 8);
   if (recent.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#9CA3AF;">No orders today yet</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:#9CA3AF;">No orders today yet</td></tr>`;
     return;
   }
   const SC = { "Pending":"status-pending","Preparing":"status-preparing","Out For Delivery":"status-out-for-delivery","Delivered":"status-delivered","Cancelled":"status-cancelled" };
   const SI = { "Pending":"⏳","Preparing":"👨‍🍳","Out For Delivery":"🚴","Delivered":"✅","Cancelled":"❌" };
-  tbody.innerHTML = recent.map(o => `
+  
+  tbody.innerHTML = recent.map(o => {
+    // Build a compact egg summary: e.g. "🥚 White 2T·60 | 🟤 Brown 1T·30"
+    const eggSummary = (o.items || []).map(item => {
+      const icon = item.egg_type.toLowerCase().includes("white") ? "🥚" : "🟤";
+      const short = item.egg_type.toLowerCase().includes("white") ? "White" : "Brown";
+      return `<div style="white-space:nowrap;font-size:0.8rem;margin-bottom:2px;">${icon} <b>${short}</b> — ${item.trays} Tray${item.trays>1?'s':''} · ${item.total_eggs} Eggs</div>`;
+    }).join("");
+
+    return `
     <tr>
       <td><a href="/admin/order/${o.order_id}" style="color:var(--primary);font-weight:700;text-decoration:none;font-size:0.82rem;">${o.order_id}</a></td>
       <td style="font-weight:600;font-size:0.88rem;">${o.customer.name}</td>
       <td><span style="background:#FEF3C7;color:#D97706;padding:2px 8px;border-radius:4px;font-weight:700;font-size:0.8rem;">Blk ${o.customer.block_name}</span></td>
-      <td style="font-weight:600;color:#7C3AED;">${o.total_eggs}</td>
-      <td style="font-weight:700;color:#059669;">₹${(o.grand_total||0).toFixed(2)}</td>
-      <td style="font-size:0.82rem;color:#6B7280;">${o.time}</td>
-      <td><span class="status-badge ${SC[o.status]||'status-pending'}" style="font-size:0.72rem;">${SI[o.status]||'⏳'} ${o.status}</span></td>
+      <td>${eggSummary || "—"}</td>
+      <td style="font-weight:600;color:#7C3AED;text-align:center;">${o.total_eggs}</td>
+      <td style="font-weight:700;color:#059669;text-align:right;">₹${(o.grand_total||0).toFixed(2)}</td>
+      <td style="font-size:0.82rem;color:#6B7280;white-space:nowrap;">${o.time}</td>
+      <td><span class="status-badge ${SC[o.status]||'status-pending'}" style="font-size:0.72rem;white-space:nowrap;">${SI[o.status]||'⏳'} ${o.status}</span></td>
     </tr>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function loadDashboardOrders() {

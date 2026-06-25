@@ -178,7 +178,7 @@ function renderOrdersTable(orders) {
   if (orders.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center;padding:40px;color:#9CA3AF;">
+        <td colspan="10" style="text-align:center;padding:40px;color:#9CA3AF;">
           <div style="font-size:2rem;margin-bottom:8px;">📦</div>
           <div>No orders found</div>
         </td>
@@ -186,38 +186,50 @@ function renderOrdersTable(orders) {
     return;
   }
 
-  tbody.innerHTML = orders.map(o => `
+  tbody.innerHTML = orders.map(o => {
+    // Build a compact egg summary: e.g. "🥚 White 2T·60 | 🟤 Brown 1T·30"
+    const eggSummary = (o.items || []).map(item => {
+      const icon = item.egg_type.toLowerCase().includes("white") ? "🥚" : "🟤";
+      const short = item.egg_type.toLowerCase().includes("white") ? "White" : "Brown";
+      return `<div style="white-space:nowrap;font-size:0.8rem;margin-bottom:2px;">${icon} <b>${short}</b> — ${item.trays} Tray${item.trays>1?'s':''} · ${item.total_eggs} Eggs</div>`;
+    }).join("");
+
+    return `
     <tr>
       <td>
-        <a href="/admin/order/${o.order_id}" style="color:var(--primary);font-weight:700;text-decoration:none;font-size:0.85rem;">
+        <a href="/admin/order/${o.order_id}" style="color:var(--primary);font-weight:700;text-decoration:none;font-size:0.82rem;white-space:nowrap;">
           ${o.order_id}
         </a>
       </td>
-      <td style="font-weight:600;">${o.customer.name}</td>
+      <td style="font-weight:600;font-size:0.88rem;">${o.customer.name}</td>
       <td>
-        <span style="background:#FEF3C7;color:#D97706;padding:2px 8px;border-radius:4px;font-weight:700;">
-          Block ${o.customer.block_name}
+        <span style="background:#FEF3C7;color:#D97706;padding:2px 8px;border-radius:4px;font-weight:700;font-size:0.8rem;">
+          Blk ${o.customer.block_name}
         </span>
       </td>
-      <td>${o.customer.room_number}</td>
+      <td style="font-size:0.88rem;">${o.customer.room_number}</td>
       <td>
-        <a href="tel:${o.customer.mobile_number}" style="color:#3B82F6;text-decoration:none;">
+        <a href="tel:${o.customer.mobile_number}" style="color:#3B82F6;text-decoration:none;font-size:0.85rem;">
           ${o.customer.mobile_number}
         </a>
       </td>
-      <td style="white-space:nowrap;font-size:0.85rem;color:#6B7280;">${o.time}</td>
+      <td>${eggSummary || "—"}</td>
+      <td style="text-align:center;font-weight:800;color:#7C3AED;font-size:0.95rem;">${o.total_eggs}</td>
+      <td style="text-align:right;font-weight:800;color:#059669;white-space:nowrap;font-size:0.92rem;">₹${(o.grand_total||0).toFixed(2)}</td>
+      <td style="white-space:nowrap;font-size:0.82rem;color:#6B7280;">${o.time}</td>
       <td>${renderStatusBadge(o.status)}</td>
       <td>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:6px;align-items:center;">
           ${renderStatusSelect(o.order_id, o.status)}
           <a href="/admin/order/${o.order_id}"
-            style="width:30px;height:30px;background:#F3F4F6;border-radius:6px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:0.9rem;">
+            style="width:30px;height:30px;background:#F3F4F6;border-radius:6px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:0.9rem;"
+            title="View Details">
             👁️
           </a>
         </div>
       </td>
-    </tr>
-  `).join("");
+    </tr>`;
+  }).join("");
 }
 
 async function updateOrderStatus(orderId, status) {
