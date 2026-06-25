@@ -28,7 +28,14 @@ os.makedirs(DB_DIR, exist_ok=True)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "skeggmart-secret-2024-xK9p")
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+
+# Support for external persistent databases (like Supabase or Render Postgres) via DATABASE_URL
+db_uri = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")
+# Render sometimes gives "postgres://" instead of "postgresql://"
+if db_uri.startswith("postgres://"):
+    db_uri = db_uri.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
